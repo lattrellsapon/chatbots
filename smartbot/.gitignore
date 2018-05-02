@@ -13,6 +13,7 @@
 /.idea
 .project
 .classpath
+.vscode
 .c9/
 *.launch
 .settings/
@@ -42,3 +43,7 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Node_modules
+/node_modules/
+
