@@ -47,3 +47,5 @@ Thumbs.db
 # Node_modules
 /node_modules/
 
+#Backend
+../backend/node_modules/
