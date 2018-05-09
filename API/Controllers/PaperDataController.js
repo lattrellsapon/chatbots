@@ -19,35 +19,56 @@ const url = "mongodb://devtest:test@ds117540.mlab.com:17540/autpaperdata";
 
 
 function getPaperName(req, res) {
-    let codeToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.paperCode ? req.body.result.parameters.paperCode : 'Unknown';
+    let codeToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
     MongoClient.connect(url, (err, client) => {
+        console.log(req.body.result.parameters.PaperCode);
+        console.log(codeToSearch);
 
-        if (err) throw err;
-
+        if (err) {
+            return res.json({
+                speech: 'Trouble connecting to the database',
+                displayText: 'Trouble connecting to the database',
+                source: 'getPaperName'
+            })
+            throw err;
+        }
         const db = client.db('autpaperdata');
 
         var query = { Paper_Code: codeToSearch };
         db.collection('PaperInfo').find(query).toArray((err, codeExists) => {
 
-            if (err) throw err;
+            if (err) {
+                return res.json({
+                    speech: 'Database error',
+                    displayText: 'Database error',
+                    source: 'getPaperName'
+                })
+                throw err;
+            }
             console.log(codeExists);
 
-            if (codeExists) {
+            if (codeExists && codeExists.length > 0) {
 
                 console.log(codeExists[0].Paper_Name);
                 console.log(JSON.stringify(codeExists[0]));
                 console.log(JSON.stringify({
                     speech: codeExists[0].Paper_Name,
                     displayText: codeExists[0].Paper_Name,
-                    source: 'paper name'
+                    source: 'getPaperName'
                 })) 
                 return res.json({
                     speech: codeExists[0].Paper_Name,
                     displayText: codeExists[0].Paper_Name,
-                    source: 'paper name'
+                    source: 'getPaperName'
                 });
 
 
+            } else {
+                return res.json({
+                    speech: 'No information is currently available for the paper code',
+                    displayText: 'No information is currently available for the paper code',
+                    source: 'getPaperName'
+                })
             }
             client.close();
 
