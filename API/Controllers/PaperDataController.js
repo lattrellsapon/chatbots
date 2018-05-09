@@ -6,8 +6,8 @@ exports.processRequest = function (req, res) {
     if (req.body.result.action == "name") {
         getPaperName(req, res);
     }
-    else if (req.body.result.action == "level") {
-        getPaperLevel(req, res)
+    else if (req.body.result.action == "code") {
+        getPaperCode(req, res)
     }
 
 };
@@ -19,7 +19,7 @@ const url = "mongodb://devtest:test@ds117540.mlab.com:17540/autpaperdata";
 
 
 function getPaperName(req, res) {
-    let codeToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
+    let codeToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
     MongoClient.connect(url, (err, client) => {
         console.log(req.body.result.parameters.PaperCode);
         console.log(codeToSearch);
@@ -34,7 +34,7 @@ function getPaperName(req, res) {
         }
         const db = client.db('autpaperdata');
 
-        var query = { Paper_Code: codeToSearch };
+        var query ={ Paper_Code: codeToSearch };
         db.collection('PaperInfo').find(query).toArray((err, codeExists) => {
 
             if (err) {
@@ -46,7 +46,6 @@ function getPaperName(req, res) {
                 throw err;
             }
             console.log(codeExists);
-
             if (codeExists && codeExists.length > 0) {
 
                 console.log(codeExists[0].Paper_Name);
@@ -61,8 +60,6 @@ function getPaperName(req, res) {
                     displayText: "This paper is called "+codeExists[0].Paper_Name,
                     source: 'getPaperName'
                 });
-
-
             } else {
                 return res.json({
                     speech: 'No information is currently available for the paper code',
@@ -71,8 +68,60 @@ function getPaperName(req, res) {
                 })
             }
             client.close();
-
         })
+    })
+}
 
+function getPaperCode(req, res) {
+    let nameToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
+    MongoClient.connect(url, (err, client) => {
+        console.log(req.body.result.parameters.PaperName);
+        console.log(nameToSearch);
+
+        if (err) {
+            return res.json({
+                speech: 'Trouble connecting to the database',
+                displayText: 'Trouble connecting to the database',
+                source: 'getPaperCode'
+            })
+            throw err;
+        }
+        const db = client.db('autpaperdata');
+
+        var query = { Paper_Name: nameToSearch };
+        db.collection('PaperInfo').find(query).toArray((err, nameExists) => {
+
+            if (err) {
+                return res.json({
+                    speech: 'Database error',
+                    displayText: 'Database error',
+                    source: 'getPaperCode'
+                })
+                throw err;
+            }
+            console.log(nameExists);
+            if (nameExists && nameExists.length > 0) {
+
+                console.log(nameExists[0].Paper_Code);
+                console.log(JSON.stringify(nameExists[0]));
+                console.log(JSON.stringify({
+                    speech: nameExists[0].Paper_Code,
+                    displayText: nameExists[0].Paper_Code,
+                    source: 'getPaperCode'
+                })) 
+                return res.json({
+                    speech: "The code for the paper is "+nameExists[0].Paper_Code,
+                    displayText: "The code for the paper is "+nameExists[0].Paper_Code,
+                    source: 'getPaperCode'
+                });
+            } else {
+                return res.json({
+                    speech: 'That is not currently a paper offered at AUT',
+                    displayText: 'That is not currently a paper offered at AUT',
+                    source: 'getPaperCode'
+                })
+            }
+            client.close();
+        })
     })
 }
