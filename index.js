@@ -1,3 +1,5 @@
+// Group 5  - Software Development
+
 'use strict';
 var express  = require('express'),
 bodyParser   = require('body-parser'),
