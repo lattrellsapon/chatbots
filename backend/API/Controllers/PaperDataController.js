@@ -11,36 +11,50 @@ exports.processRequest = function(req, res) {
         getPaperLevel(req,res)
     }
 };
+// Connect to database
+
+const MongoClient = require('mongodb').MongoClient;
+
+const url = "mongodb://devtest:test@ds117540.mlab.com:17540/autpaperdata";
+
 
 function getPaperName(req,res)
 {
 let codeToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.paperCode ? req.body.result.parameters.paperCode : 'Unknown';
-PaperInfo.findOne({name:codeToSearch},function(err,codeExists)
-      {
-        if (err)
-        {
-          return res.json({
-              speech: 'Something went wrong!',
-              displayText: 'Something went wrong!',
-              source: 'paper name'
-          });
-        }
-        console.log(codeExists);
-if (codeExists)
-        {
-          return res.json({
-                speech: teamExists.description,
-                displayText: teamExists.description,
-                source: 'paper name'
-            });
-        }
-        else {
-          return res.json({
-                speech: 'Currently I am not having information about this paper',
-                displayText: 'Currently I am not having information about this paper',
-                source: 'paper name'
-            });
-        }
-      });
-}
+MongoClient.connect(url, (err, client) => {
 
+    if(err) throw err;
+    
+    const db = client.db('autpaperdata');
+  
+    var query = {Paper_Code: codeToSearch};
+    db.collection('PaperInfo').find(query).toArray( (err, codeExists) => {
+  
+        if(err) throw err;
+        console.log(codeExists);
+        
+        if (codeExists) {
+
+            console.log(codeExists[0].Paper_Name);
+            console.log(JSON.stringify(codeExists[0]));
+            console.log(JSON.stringify({
+                speech: codeExists[0].Paper_Name,
+                displayText: codeExists[0].Paper_Name,
+                source: 'paper name'
+            }))
+            var payload = JSON.stringify(codeExists[0]);
+            codeExists.
+            return payload.json({
+                speech: payload.Paper_Name,
+                displayText: payload.Paper_Name,
+                source: 'paper_name'
+            });
+
+            
+        }
+        client.close();
+  
+    })
+  
+  })
+}
