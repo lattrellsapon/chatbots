@@ -57,8 +57,8 @@ function getPaperName(req, res) {
                     source: 'getPaperName'
                 })) 
                 return res.json({
-                    speech: codeExists[0].Paper_Name,
-                    displayText: codeExists[0].Paper_Name,
+                    speech: "This paper is called "+codeExists[0].Paper_Name,
+                    displayText: "This paper is called "+codeExists[0].Paper_Name,
                     source: 'getPaperName'
                 });
 
