@@ -8,6 +8,8 @@ exports.processRequest = function (req, res) {
     }
     else if (req.body.result.action == "code") {
         getPaperCode(req, res)
+    } else if (req.body.result.action == "papersFromLevel") {
+      getPapersFromLevel(req,res)
     }
 
 };
@@ -33,7 +35,7 @@ function getPaperName(req, res) {
         }
         const db = client.db('autpaperdata');
 
-        var query ={ Paper_Code: codeToSearch };
+        var query ={Code: codeToSearch };
         db.collection('PaperInfo').find(query).toArray((err, codeExists) => {
 
             if (err) {
@@ -44,17 +46,17 @@ function getPaperName(req, res) {
                 })
                 throw err;
             }
-            console.log("codeExists: " + codeExists);
+            console.log("codeExists: " + codeExists[0]);
             if (codeExists && codeExists.length > 0) {
 
                 console.log("Return Object: " + JSON.stringify({
-                    speech: codeExists[0].Paper_Name,
-                    displayText: codeExists[0].Paper_Name,
+                    speech: codeExists[0].Name,
+                    displayText: codeExists[0].Name,
                     source: 'getPaperName'
-                })) 
+                }))
                 return res.json({
-                    speech: "This paper is called "+codeExists[0].Paper_Name,
-                    displayText: "This paper is called "+codeExists[0].Paper_Name,
+                    speech: "This paper is called "+codeExists[0].Name,
+                    displayText: "This paper is called "+codeExists[0].Name,
                     source: 'getPaperName'
                 });
             } else {
@@ -72,8 +74,8 @@ function getPaperName(req, res) {
 function getPaperCode(req, res) {
     let nameToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
     MongoClient.connect(url, (err, client) => {
-        console.log(req.body.result.parameters.PaperName);
-        console.log(nameToSearch);
+        console.log("Req PaperName to search: " +req.body.result.parameters.PaperName);
+        console.log("PaperName to search: "+nameToSearch);
 
         if (err) {
             return res.json({
@@ -85,7 +87,7 @@ function getPaperCode(req, res) {
         }
         const db = client.db('autpaperdata');
 
-        var query = { Paper_Name: nameToSearch };
+        var query = { Name: nameToSearch };
         db.collection('PaperInfo').find(query).toArray((err, nameExists) => {
 
             if (err) {
@@ -96,19 +98,18 @@ function getPaperCode(req, res) {
                 })
                 throw err;
             }
-            console.log(nameExists);
+            console.log("nameExists: " + nameExists);
             if (nameExists && nameExists.length > 0) {
 
-                console.log(nameExists[0].Paper_Code);
-                console.log(JSON.stringify(nameExists[0]));
-                console.log(JSON.stringify({
-                    speech: nameExists[0].Paper_Code,
-                    displayText: nameExists[0].Paper_Code,
+                console.log("PaperCode: "+JSON.stringify(nameExists[0].Code));
+                console.log("Return Object: "+JSON.stringify({
+                    speech: "The code for the paper is "+nameExists[0].Code,
+                    displayText: "The code for the paper is "+nameExists[0].Code,
                     source: 'getPaperCode'
-                })) 
+                }))
                 return res.json({
-                    speech: "The code for the paper is "+nameExists[0].Paper_Code,
-                    displayText: "The code for the paper is "+nameExists[0].Paper_Code,
+                    speech: "The code for the paper is "+nameExists[0].Code,
+                    displayText: "The code for the paper is "+nameExists[0].Code,
                     source: 'getPaperCode'
                 });
             } else {
