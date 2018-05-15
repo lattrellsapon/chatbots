@@ -17,12 +17,11 @@ const MongoClient = require('mongodb').MongoClient;
 
 const url = "mongodb://devtest:test@ds117540.mlab.com:17540/autpaperdata";
 
-
 function getPaperName(req, res) {
-    let codeToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
+    let codeToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
     MongoClient.connect(url, (err, client) => {
-        console.log(req.body.result.parameters.PaperCode);
-        console.log(codeToSearch);
+        console.log("Request PaperCode to search : " + req.body.result.parameters.PaperCode);
+        console.log("PaperCode to search: " + codeToSearch);
 
         if (err) {
             return res.json({
@@ -45,12 +44,10 @@ function getPaperName(req, res) {
                 })
                 throw err;
             }
-            console.log(codeExists);
+            console.log("codeExists: " + codeExists);
             if (codeExists && codeExists.length > 0) {
 
-                console.log(codeExists[0].Paper_Name);
-                console.log(JSON.stringify(codeExists[0]));
-                console.log(JSON.stringify({
+                console.log("Return Object: " + JSON.stringify({
                     speech: codeExists[0].Paper_Name,
                     displayText: codeExists[0].Paper_Name,
                     source: 'getPaperName'
