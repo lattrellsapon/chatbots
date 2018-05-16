@@ -17,6 +17,10 @@ exports.processRequest = function (req, res) {
     {
         getCorePapers(req, res);
     }
+    else if (req.body.result.action == "papersFromPoints")
+    {
+        getPapersFromPoints( req, res);
+    }
 };
 // Connect to database
 
@@ -54,7 +58,7 @@ function getCorePapers(req, res) {
             }
             console.log("levelExists: " + levelExists);
 
-            var text = ""
+            var text = "";
 
             if (levelExists && levelExists.length > 0) {
 
@@ -81,6 +85,65 @@ function getCorePapers(req, res) {
                     speech: 'Core Papers not available',
                     displayText: 'Core Papers not available ',
                     source: 'getCorePapers'
+                })
+            }
+            client.close();
+        })
+    })
+}
+
+function getPapersFromPoints(req, res) {
+    let pointsToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperPoints ? req.body.result.parameters.PaperPoints : 'Unknown';
+    MongoClient.connect(url, (err, client) => {
+        console.log("Request PaperPoints to search : " + req.body.result.parameters.PaperPoints);
+        console.log("PaperPoints to search: " + pointsToSearch);
+
+        if (err) {
+            return res.json({
+                speech: 'Trouble connecting to the database',
+                displayText: 'Trouble connecting to the database',
+                source: 'getPaperPoints'
+            })
+            throw err;
+        }
+        const db = client.db('autpaperdata');
+
+        var query ={ Points: parseFloat(pointsToSearch) };
+        db.collection('PaperInfo').find(query).toArray((err, pointsExists) => {
+
+            if (err) {
+                return res.json({
+                    speech: 'Database error',
+                    displayText: 'Database error',
+                    source: 'getPaperName'
+                })
+                throw err;
+            }
+            console.log("pointsExists: " + pointsExists);
+            var text = "";
+
+            if (pointsExists && pointsExists.length > 0) {
+
+                for (var i = 0; i < pointsExists.length; i++)
+                {
+                    text += (pointsExists[i].Code + " " + pointsExists[i].Name + " ");
+                }
+
+                console.log("Return Object: " + JSON.stringify({
+                    speech: text,
+                    displayText: text,
+                    source: 'getPaperName'
+                })) 
+                return res.json({
+                    speech: text,
+                    displayText: text,
+                    source: 'getPaperName'
+                });
+            } else {
+                return res.json({
+                    speech: 'No papers are worth that many points',
+                    displayText: 'No papers are worth that many points',
+                    source: 'getPaperName'
                 })
             }
             client.close();
