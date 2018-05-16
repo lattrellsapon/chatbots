@@ -24,13 +24,12 @@ exports.processRequest = function (req, res)
         break;
       case 'papersFromPoints':
         main(res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points.')
-        break
+        break;
+      case 'availabilityFromPapers':
+        main(res, name, 'getAvailability', 'Not available at AUT.')  
+        break;
       default:
         console.log("Function assign failed")
-    }
-    else if (req.body.result.action == "availabilityFromPapers")
-    {
-        main(res, name, 'getAvailability', 'Not available at AUT.')
     }
 };
 
