@@ -8,7 +8,6 @@ exports.processRequest = function (req, res)
     var points = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperPoints ? req.body.result.parameters.PaperPoints : 'Unknown';
     var name = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
     var code = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
-    //var availability = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperAvailability ? req.body.result.parameters.PaperAvailability : 'Unknown';
 
     if (req.body.result.action == "name")
     {
