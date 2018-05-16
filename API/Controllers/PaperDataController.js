@@ -187,7 +187,7 @@ function getPapersFromYearLevel (req, res){
 
                 return res.json({
 
-                    speech: speech,
+                    speech: " "+speech,
                     displayText: speech,
                     ssource: 'getPapersFromYearLevel'
 
