@@ -8,20 +8,18 @@ exports.processRequest = function (req, res)
     var points = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperPoints ? req.body.result.parameters.PaperPoints : 'Unknown';
     var name = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
     var code = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
-
+    
     if (req.body.result.action == "name") 
     {
-        //getPaperName(req, res);
-        main(res, code, 'getPaperName', 'No information is currently available for the paper code')
+        main(res, code, 'getPaperName', 'No information is currently available for the paper code.')
     }
     else if (req.body.result.action == "code") 
     {
-        //getPaperCode(req, res)
-        main(res, name, 'getPaperCode', 'That is not currently a paper offered at AUT')
+        main(res, name, 'getPaperCode', 'That is not currently a paper offered at AUT.')
     }
     else if (req.body.result.action == "papersFromLevel")
     {
-        getPapersFromYearLevel(req, res);
+        main(res, parseFloat(level), 'getPapersFromYearLevel', 'No papers are available in that level in AUT.')
     }
     else if (req.body.result.action == "corePapersFromLevel")
     {
@@ -29,7 +27,7 @@ exports.processRequest = function (req, res)
     }
     else if (req.body.result.action == "papersFromPoints")
     {
-        main(res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points')
+        main(res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points.')
     }
 };
 
@@ -45,7 +43,7 @@ function main(res, search, source, failText)
     {
         var query = "";
 
-        if (source == 'getCorePapers')
+        if (source == 'getCorePapers' || source == 'getPapersFromYearLevel')
         {
             query = { Level: itemToSearch };
         }
@@ -106,6 +104,11 @@ function main(res, search, source, failText)
                 else if (source == 'getPaperName')
                 {
                     successText = getPaperName(itemExists);
+                }
+
+                else if (source == 'getPapersFromYearLevel')
+                {
+                    successText = getPapersFromYearLevel(itemExists);
                 }
 
                 console.log("Return Object: " + JSON.stringify(
@@ -172,80 +175,27 @@ function getPaperName(codeExists)
     return "This paper is called " + codeExists[0].Name;
 }
 
-function getPapersFromYearLevel (req, res){
-    let levelToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperLevel ? req.body.result.parameters.PaperLevel : 'Unknown';
-    MongoClient.connect(url, (err, client) => {
-        console.log("Go here . . ." +req.body.result.parameters.PaperLevel);
-        console.log("Level to search: "+levelToSearch);
+function getPapersFromYearLevel(levelExists)
+{
+    var text = "";
 
+    for (var i = 0; i < levelExists.length; i++)
+    {
+        text += levelExists[i].Name + "(" + levelExists[i].Code + ")";
 
-        if (err) {
-            return res.json({
-                speech: 'Trouble connecting to the database',
-                displayText: 'Trouble connecting to the database',
-                source: 'getPapersFromYearLevel'
-            })
-            throw err;
+        if(i == levelExists.length -2)
+        {
+            text += " and "
+        } 
+        else if (i == levelExists.length - 1)
+        {
+            //leave blank
         }
+        else
+        {
+            text += ", "
+        }
+    }
 
-        const db = client.db('autpaperdata');
-
-        var query = { Level:  parseFloat(levelToSearch)};
-
-        db.collection('PaperInfo').find(query).toArray((err, levelExist) => {
-
-            console.log("Go here . . ." +levelExist);
-
-            if (err) {
-                return res.json({
-                    speech: 'Database error',
-                    displayText: 'Database error',
-                    source: 'getPapersFromYearLevel'
-                })
-                throw err;
-            }
-
-            if (levelExist.length > 0) {
-
-                var paper = JSON.stringify(levelExist);
-                var papers = JSON.parse(paper);
-
-                let speech = "";
-
-                console.log(papers.length);
-
-                for ( var i = 0; i < papers.length; i++)
-                {
-                    speech += papers[i].Name + "(" + papers[i].Code + ")";
-
-                    if(i == papers.length -2)
-                    {
-                        speech += " and "
-                    } else if (i == papers.length-1)
-                    {
-                        //leave blank
-                    }
-                    else
-                    {
-                        speech += ", "
-                    }
-                }
-
-                return res.json({
-
-                    speech: " "+speech,
-                    displayText: speech,
-                    ssource: 'getPapersFromYearLevel'
-
-                })
-            } else {
-                return res.json({
-                    speech: 'That is not currently a paper offered at AUT',
-                    displayText: 'That is not currently a paper offered at AUT',
-                    source: 'getPapersFromYearLevel'
-                })
-            }
-            client.close();
-        })
-    })
+    return text;
 }
