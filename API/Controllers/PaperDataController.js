@@ -55,11 +55,14 @@ function main(res, search, source, failText)
           case 'getPapersFromPoints':
             query = { Points: itemToSearch};
             break;
-          case 'getPaperCode' || 'getAvailability':
+          case 'getPaperCode':
             query = { Name: itemToSearch };
             break;
           case 'getPaperName':
             query = {Code: itemToSearch};
+            break;  
+          case 'getAvailability':
+            query = {Name: itemToSearch};
             break;  
           default:
             console.log("Query assign failed.")
