@@ -8,8 +8,10 @@ exports.processRequest = function (req, res) {
     }
     else if (req.body.result.action == "code") {
         getPaperCode(req, res)
-    } else if (req.body.result.action == "papersFromLevel") {
-      getPapersFromLevel(req,res)
+    }
+    else if (req.body.result.action == "papersFromLevel")
+    {
+        getPapersFromYearLevel(req, res);
     }
 
 };
@@ -117,6 +119,84 @@ function getPaperCode(req, res) {
                     speech: 'That is not currently a paper offered at AUT',
                     displayText: 'That is not currently a paper offered at AUT',
                     source: 'getPaperCode'
+                })
+            }
+            client.close();
+        })
+    })
+}
+
+function getPapersFromYearLevel (req, res){
+    let levelToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperLevel ? req.body.result.parameters.PaperLevel : 'Unknown';
+    MongoClient.connect(url, (err, client) => {
+        console.log("Go here . . ." +req.body.result.parameters.PaperLevel);
+        console.log("Level to search: "+levelToSearch);
+
+
+        if (err) {
+            return res.json({
+                speech: 'Trouble connecting to the database',
+                displayText: 'Trouble connecting to the database',
+                source: 'getPapersFromYearLevel'
+            })
+            throw err;
+        }
+
+        const db = client.db('autpaperdata');
+
+        var query = { Level:  parseFloat(levelToSearch)};
+
+        db.collection('PaperInfo').find(query).toArray((err, levelExist) => {
+
+            console.log("Go here . . ." +levelExist);
+
+            if (err) {
+                return res.json({
+                    speech: 'Database error',
+                    displayText: 'Database error',
+                    source: 'getPapersFromYearLevel'
+                })
+                throw err;
+            }
+
+            if (levelExist.length > 0) {
+
+                var paper = JSON.stringify(levelExist);
+                var papers = JSON.parse(paper);
+
+                let speech = "";
+
+                console.log(papers.length);
+
+                for ( var i = 0; i < papers.length; i++)
+                {
+                    speech += papers[i].Name + "(" + papers[i].Code + ")";
+
+                    if(i == papers.length -2)
+                    {
+                        speech += " and "
+                    } else if (i == papers.length-1)
+                    {
+                        //leave blank
+                    }
+                    else
+                    {
+                        speech += ", "
+                    }
+                }
+
+                return res.json({
+
+                    speech: speech,
+                    displayText: speech,
+                    ssource: 'getPapersFromYearLevel'
+
+                })
+            } else {
+                return res.json({
+                    speech: 'That is not currently a paper offered at AUT',
+                    displayText: 'That is not currently a paper offered at AUT',
+                    source: 'getPapersFromYearLevel'
                 })
             }
             client.close();
