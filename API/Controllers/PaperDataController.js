@@ -2,32 +2,31 @@
 var mongoose = require('mongoose');
 var PaperInfo = mongoose.model('PaperInfo');
 
-exports.processRequest = function (req, res) 
+exports.processRequest = function (req, res)
 {
     var level = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperLevel ? req.body.result.parameters.PaperLevel : 'Unknown';
     var points = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperPoints ? req.body.result.parameters.PaperPoints : 'Unknown';
     var name = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
     var code = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
-    
-    if (req.body.result.action == "name") 
-    {
+
+    switch(req.body.result.action) {
+      case 'name':
         main(res, code, 'getPaperName', 'No information is currently available for the paper code.')
-    }
-    else if (req.body.result.action == "code") 
-    {
+        break;
+      case 'code':
         main(res, name, 'getPaperCode', 'That is not currently a paper offered at AUT.')
-    }
-    else if (req.body.result.action == "papersFromLevel")
-    {
+        break;
+      case 'papersFromLevel':
         main(res, parseFloat(level), 'getPapersFromYearLevel', 'No papers are available in that level in AUT.')
-    }
-    else if (req.body.result.action == "corePapersFromLevel")
-    {
+        break;
+      case 'corePapersFromLevel':
         main(res, parseFloat(level), 'getCorePapers', 'Core Papers not available.')
-    }
-    else if (req.body.result.action == "papersFromPoints")
-    {
+        break;
+      case 'papersFromPoints':
         main(res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points.')
+        break
+      default:
+        console.log("Function assign failed")
     }
 };
 
@@ -39,28 +38,31 @@ function main(res, search, source, failText)
 {
     let itemToSearch = search;
 
-    MongoClient.connect(url, (err, client) => 
+    MongoClient.connect(url, (err, client) =>
     {
         var query = "";
 
-        if (source == 'getCorePapers' || source == 'getPapersFromYearLevel')
-        {
-            query = { Level: itemToSearch };
-        }
-        else if (source == 'getPapersFromPoints')
-        {
-            query = { Points: itemToSearch };
-        }
-        else if (source == 'getPaperCode')
-        {
-            query = { Name: itemToSearch };
-        }
-        else if (source == 'getPaperName')
-        {
-            query = { Code: itemToSearch };
+        switch(source) {
+          case 'getCorePapers':
+            query = { Core: "TRUE", Level: itemToSearch };
+            break;
+          case 'getPapersFromYearLevel':
+            query = { Level: itemToSearch};
+            break;
+          case 'getPapersFromPoints':
+            query = { Points: itemToSearch};
+            break;
+          case 'getPaperCode':
+            query = { Name: itemToSearch};
+            break;
+          case 'getPaperName':
+            query = {Code: itemToSearch};
+            break;
+          default:
+            console.log("Query assign failed.")
         }
 
-        if (err) 
+        if (err)
         {
             return res.json(
             {
@@ -74,9 +76,9 @@ function main(res, search, source, failText)
         const db = client.db('autpaperdata');
         var successText = "";
 
-        db.collection('PaperInfo').find(query).toArray((err, itemExists) => 
+        db.collection('PaperInfo').find(query).toArray((err, itemExists) =>
         {
-            if (err) 
+            if (err)
             {
                 return res.json(
                 {
@@ -87,44 +89,43 @@ function main(res, search, source, failText)
                 throw err;
             }
 
-            if (itemExists && itemExists.length > 0) 
+            if (itemExists && itemExists.length > 0)
             {
-                if (source == 'getCorePapers')
-                {
-                    successText = getCorePapers(itemExists);
-                }
-                else if (source == 'getPapersFromPoints')
-                {
-                    successText = getPapersFromPoints(itemExists);
-                }
-                else if (source == 'getPaperCode')
-                {
-                    successText = getPaperCode(itemExists);
-                }
-                else if (source == 'getPaperName')
-                {
-                    successText = getPaperName(itemExists);
-                }
+              switch(source) {
+                case 'getCorePapers':
+                  successText = getCorePapers(itemExists);
+                  break;
+                case 'getPapersFromYearLevel':
+                  successText = getPapersFromYearLevel(itemExists);
+                  break;
+                case 'getPapersFromPoints':
+                  successText = getPapersFromPoints(itemExists);
+                  break;
+                case 'getPaperCode':
+                  successText = getPaperCode(itemExists);
+                  break;
+                case 'getPaperName':
+                  successText = getPaperName(itemExists);
+                  break;
+                default:
+                  console.log("successText assign failed.")
+              }
 
-                else if (source == 'getPapersFromYearLevel')
-                {
-                    successText = getPapersFromYearLevel(itemExists);
-                }
 
                 console.log("Return Object: " + JSON.stringify(
                 {
                     speech: successText,
                     displayText: successText,
                     source: source
-                })) 
+                }))
                 return res.json(
                 {
                     speech: successText,
                     displayText: successText,
                     source: source
                 });
-            } 
-            else 
+            }
+            else
             {
                 return res.json(
                 {
@@ -144,10 +145,7 @@ function getCorePapers(levelExists)
 
     for (var i = 0; i < levelExists.length; i++)
     {
-        if (levelExists[i].Core === "TRUE")
-        {
-            text += (levelExists[i].Code + " " + levelExists[i].Name + " ");
-        }
+        text += (levelExists[i].Code + " " + levelExists[i].Name + " ");
     }
 
     return text;
@@ -186,7 +184,7 @@ function getPapersFromYearLevel(levelExists)
         if(i == levelExists.length -2)
         {
             text += " and "
-        } 
+        }
         else if (i == levelExists.length - 1)
         {
             //leave blank
