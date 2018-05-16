@@ -55,12 +55,12 @@ function main(res, search, source, failText)
           case 'getPapersFromPoints':
             query = { Points: itemToSearch};
             break;
-          case 'getPaperCode':
-            query = { Name: itemToSearch};
+          case 'getPaperCode' || 'getAvailability':
+            query = { Name: itemToSearch };
             break;
           case 'getPaperName':
             query = {Code: itemToSearch};
-            break;
+            break;  
           default:
             console.log("Query assign failed.")
         }
@@ -204,6 +204,8 @@ function getPapersFromYearLevel(levelExists)
 }
 function getAvailability(nameExists)
 {
+    console.log(nameExists[0].Name);
+
   var text = `${nameExists[0].Name} is available in semester `;
 
   for (var i = 0; i < nameExists[0].Semester.length; i++)
