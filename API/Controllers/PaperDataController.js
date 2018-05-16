@@ -13,13 +13,80 @@ exports.processRequest = function (req, res) {
     {
         getPapersFromYearLevel(req, res);
     }
-
+    else if (req.body.result.action == "corePapersFromLevel")
+    {
+        getCorePapers(req, res);
+    }
 };
 // Connect to database
 
 const MongoClient = require('mongodb').MongoClient;
 
 const url = "mongodb://devtest:test@ds117540.mlab.com:17540/autpaperdata";
+
+function getCorePapers(req, res) {
+    let levelToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperLevel ? req.body.result.parameters.PaperLevel : 'Unknown';
+    
+    MongoClient.connect(url, (err, client) => {
+        console.log("Request PaperLevel to search : " + req.body.result.parameters.PaperLevel);
+        console.log("PaperLevel to search: " + levelToSearch);
+
+        if (err) {
+            return res.json({
+                speech: 'Trouble connecting to the database',
+                displayText: 'Trouble connecting to the database',
+                source: 'getPaperName'
+            })
+            throw err;
+        }
+        const db = client.db('autpaperdata');
+
+        var query ={ Level: parseFloat(levelToSearch) };
+        db.collection('PaperInfo').find(query).toArray((err, levelExists) => {
+
+            if (err) {
+                return res.json({
+                    speech: 'Database error',
+                    displayText: 'Database error',
+                    source: 'getPaperName'
+                })
+                throw err;
+            }
+            console.log("levelExists: " + levelExists);
+
+            var text = ""
+
+            if (levelExists && levelExists.length > 0) {
+
+                for (var i = 0; i < levelExists.length; i++)
+                {
+                    if (levelExists[i].Core === "TRUE")
+                    {
+                        text += (levelExists[i].Code + " " + levelExists[i].Name + " ");
+                    }
+                }
+
+                console.log("Return Object: " + JSON.stringify({
+                    speech: text,
+                    displayText: text,
+                    source: 'getCorePapers'
+                })) 
+                return res.json({
+                    speech: text,
+                    displayText: text,
+                    source: 'getCorePapers'
+                });
+            } else {
+                return res.json({
+                    speech: 'Core Papers not available',
+                    displayText: 'Core Papers not available ',
+                    source: 'getCorePapers'
+                })
+            }
+            client.close();
+        })
+    })
+}
 
 function getPaperName(req, res) {
     let codeToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
