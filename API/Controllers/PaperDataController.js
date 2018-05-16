@@ -2,11 +2,17 @@
 var mongoose = require('mongoose');
 var PaperInfo = mongoose.model('PaperInfo');
 
-exports.processRequest = function (req, res) {
-    if (req.body.result.action == "name") {
+exports.processRequest = function (req, res) 
+{
+    var level = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperLevel ? req.body.result.parameters.PaperLevel : 'Unknown';
+    var points = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperPoints ? req.body.result.parameters.PaperPoints : 'Unknown';
+
+    if (req.body.result.action == "name") 
+    {
         getPaperName(req, res);
     }
-    else if (req.body.result.action == "code") {
+    else if (req.body.result.action == "code") 
+    {
         getPaperCode(req, res)
     }
     else if (req.body.result.action == "papersFromLevel")
@@ -15,76 +21,93 @@ exports.processRequest = function (req, res) {
     }
     else if (req.body.result.action == "corePapersFromLevel")
     {
-        getCorePapers(req, res);
+        main(req, res, parseFloat(level), 'getCorePapers', 'Core Papers not available.')
     }
     else if (req.body.result.action == "papersFromPoints")
     {
-        getPapersFromPoints( req, res);
+        main(req, res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points')
     }
 };
+
 // Connect to database
-
 const MongoClient = require('mongodb').MongoClient;
-
 const url = "mongodb://devtest:test@ds117540.mlab.com:17540/autpaperdata";
 
-function getCorePapers(req, res) {
-    let levelToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperLevel ? req.body.result.parameters.PaperLevel : 'Unknown';
-    
-    MongoClient.connect(url, (err, client) => {
-        console.log("Request PaperLevel to search : " + req.body.result.parameters.PaperLevel);
-        console.log("PaperLevel to search: " + levelToSearch);
+function main(req, res, search, source, failText)
+{
+    let itemToSearch = search;
 
-        if (err) {
-            return res.json({
+    MongoClient.connect(url, (err, client) => 
+    {
+        var query = "";
+
+        if (source == 'getCorePapers')
+        {
+            query = { Level: itemToSearch };
+        }
+        else if (source == 'getPapersFromPoints')
+        {
+            query = { Points: itemToSearch };
+        }
+
+        if (err) 
+        {
+            return res.json(
+            {
                 speech: 'Trouble connecting to the database',
                 displayText: 'Trouble connecting to the database',
-                source: 'getPaperName'
+                source: source
             })
             throw err;
         }
+
         const db = client.db('autpaperdata');
+        var successText = "";
 
-        var query ={ Level: parseFloat(levelToSearch) };
-        db.collection('PaperInfo').find(query).toArray((err, levelExists) => {
-
-            if (err) {
-                return res.json({
+        db.collection('PaperInfo').find(query).toArray((err, itemExists) => 
+        {
+            if (err) 
+            {
+                return res.json(
+                {
                     speech: 'Database error',
                     displayText: 'Database error',
-                    source: 'getPaperName'
+                    source: source
                 })
                 throw err;
             }
-            console.log("levelExists: " + levelExists);
 
-            var text = "";
-
-            if (levelExists && levelExists.length > 0) {
-
-                for (var i = 0; i < levelExists.length; i++)
+            if (itemExists && itemExists.length > 0) 
+            {
+                if (source == 'getCorePapers')
                 {
-                    if (levelExists[i].Core === "TRUE")
-                    {
-                        text += (levelExists[i].Code + " " + levelExists[i].Name + " ");
-                    }
+                    successText = getCorePapers(itemExists);
+                }
+                else if (source == 'getPapersFromPoints')
+                {
+                    successText = getPapersFromPoints(itemExists);
                 }
 
-                console.log("Return Object: " + JSON.stringify({
-                    speech: text,
-                    displayText: text,
-                    source: 'getCorePapers'
+                console.log("Return Object: " + JSON.stringify(
+                {
+                    speech: successText,
+                    displayText: successText,
+                    source: source
                 })) 
-                return res.json({
-                    speech: text,
-                    displayText: text,
-                    source: 'getCorePapers'
+                return res.json(
+                {
+                    speech: successText,
+                    displayText: successText,
+                    source: source
                 });
-            } else {
-                return res.json({
-                    speech: 'Core Papers not available',
-                    displayText: 'Core Papers not available ',
-                    source: 'getCorePapers'
+            } 
+            else 
+            {
+                return res.json(
+                {
+                    speech: failText,
+                    displayText: failText,
+                    source: source
                 })
             }
             client.close();
@@ -92,115 +115,31 @@ function getCorePapers(req, res) {
     })
 }
 
-function getPapersFromPoints(req, res) {
-    let pointsToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperPoints ? req.body.result.parameters.PaperPoints : 'Unknown';
-    MongoClient.connect(url, (err, client) => {
-        console.log("Request PaperPoints to search : " + req.body.result.parameters.PaperPoints);
-        console.log("PaperPoints to search: " + pointsToSearch);
+function getCorePapers(levelExists)
+{
+    var text = "";
 
-        if (err) {
-            return res.json({
-                speech: 'Trouble connecting to the database',
-                displayText: 'Trouble connecting to the database',
-                source: 'getPaperPoints'
-            })
-            throw err;
+    for (var i = 0; i < levelExists.length; i++)
+    {
+        if (levelExists[i].Core === "TRUE")
+        {
+            text += (levelExists[i].Code + " " + levelExists[i].Name + " ");
         }
-        const db = client.db('autpaperdata');
+    }
 
-        var query ={ Points: parseFloat(pointsToSearch) };
-        db.collection('PaperInfo').find(query).toArray((err, pointsExists) => {
-
-            if (err) {
-                return res.json({
-                    speech: 'Database error',
-                    displayText: 'Database error',
-                    source: 'getPaperName'
-                })
-                throw err;
-            }
-            console.log("pointsExists: " + pointsExists);
-            var text = "";
-
-            if (pointsExists && pointsExists.length > 0) {
-
-                for (var i = 0; i < pointsExists.length; i++)
-                {
-                    text += (pointsExists[i].Code + " " + pointsExists[i].Name + " ");
-                }
-
-                console.log("Return Object: " + JSON.stringify({
-                    speech: text,
-                    displayText: text,
-                    source: 'getPaperName'
-                })) 
-                return res.json({
-                    speech: text,
-                    displayText: text,
-                    source: 'getPaperName'
-                });
-            } else {
-                return res.json({
-                    speech: 'No papers are worth that many points',
-                    displayText: 'No papers are worth that many points',
-                    source: 'getPaperName'
-                })
-            }
-            client.close();
-        })
-    })
+    return text;
 }
 
-function getPaperName(req, res) {
-    let codeToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
-    MongoClient.connect(url, (err, client) => {
-        console.log("Request PaperCode to search : " + req.body.result.parameters.PaperCode);
-        console.log("PaperCode to search: " + codeToSearch);
+function getPapersFromPoints(pointsExists)
+{
+    var text = "";
 
-        if (err) {
-            return res.json({
-                speech: 'Trouble connecting to the database',
-                displayText: 'Trouble connecting to the database',
-                source: 'getPaperName'
-            })
-            throw err;
-        }
-        const db = client.db('autpaperdata');
+    for (var i = 0; i < pointsExists.length; i++)
+    {
+        text += (pointsExists[i].Code + " " + pointsExists[i].Name + " ");
+    }
 
-        var query ={Code: codeToSearch };
-        db.collection('PaperInfo').find(query).toArray((err, codeExists) => {
-
-            if (err) {
-                return res.json({
-                    speech: 'Database error',
-                    displayText: 'Database error',
-                    source: 'getPaperName'
-                })
-                throw err;
-            }
-            console.log("codeExists: " + codeExists[0]);
-            if (codeExists && codeExists.length > 0) {
-
-                console.log("Return Object: " + JSON.stringify({
-                    speech: codeExists[0].Name,
-                    displayText: codeExists[0].Name,
-                    source: 'getPaperName'
-                }))
-                return res.json({
-                    speech: "This paper is called "+codeExists[0].Name,
-                    displayText: "This paper is called "+codeExists[0].Name,
-                    source: 'getPaperName'
-                });
-            } else {
-                return res.json({
-                    speech: 'No information is currently available for the paper code',
-                    displayText: 'No information is currently available for the paper code',
-                    source: 'getPaperName'
-                })
-            }
-            client.close();
-        })
-    })
+    return text;
 }
 
 function getPaperCode(req, res) {
