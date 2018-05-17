@@ -9,27 +9,28 @@ exports.processRequest = function (req, res)
     var name = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
     var code = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
 
-    switch(req.body.result.action) {
-      case 'name':
-        main(res, code, 'getPaperName', 'No information is currently available for the paper code.')
-        break;
-      case 'code':
-        main(res, name, 'getPaperCode', 'That is not currently a paper offered at AUT.')
-        break;
-      case 'papersFromLevel':
-        main(res, parseFloat(level), 'getPapersFromYearLevel', 'No papers are available in that level in AUT.')
-        break;
-      case 'corePapersFromLevel':
-        main(res, parseFloat(level), 'getCorePapers', 'Core Papers not available.')
-        break;
-      case 'papersFromPoints':
-        main(res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points.')
-        break;
-      case 'availabilityFromPapers':
-        main(res, name, 'getAvailability', 'Not available at AUT.')  
-        break;
-      default:
-        console.log("Function assign failed")
+    switch(req.body.result.action) 
+    {
+        case 'name':
+            main(res, code, 'getPaperName', 'No information is currently available for the paper code.')
+            break;
+        case 'code':
+            main(res, name, 'getPaperCode', 'That is not currently a paper offered at AUT.')
+            break;
+        case 'papersFromLevel':
+            main(res, parseFloat(level), 'getPapersFromYearLevel', 'No papers are available in that level in AUT.')
+            break;
+        case 'corePapersFromLevel':
+            main(res, parseFloat(level), 'getCorePapers', 'Core Papers not available.')
+            break;
+        case 'papersFromPoints':
+            main(res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points.')
+            break;
+        case 'availabilityFromPapers':
+            main(res, name, 'getAvailability', 'Not available at AUT.')  
+            break;
+        default:
+            console.log("Function assign failed")
     }
 };
 
@@ -45,27 +46,31 @@ function main(res, search, source, failText)
     {
         var query = "";
 
-        switch(source) {
-          case 'getCorePapers':
-            query = { Core: "TRUE", Level: itemToSearch };
-            break;
-          case 'getPapersFromYearLevel':
-            query = { Level: itemToSearch};
-            break;
-          case 'getPapersFromPoints':
-            query = { Points: itemToSearch};
-            break;
-          case 'getPaperCode':
-            query = { Name: itemToSearch };
-            break;
-          case 'getPaperName':
-            query = {Code: itemToSearch};
-            break;  
-          case 'getAvailability':
-            query = {Name: itemToSearch};
-            break;  
-          default:
-            console.log("Query assign failed.")
+        switch(source) 
+        {
+            case 'getCorePapers':
+                query = { Core: "TRUE", Level: itemToSearch };
+                break;
+            case 'getPapersFromYearLevel':
+                query = { Level: itemToSearch};
+                break;
+            case 'getPapersFromPoints':
+                query = { Points: itemToSearch};
+                break;
+            case 'getPaperCode':
+                query = { Name: itemToSearch };
+                break;
+            case 'getPaperName':
+                query = {Code: itemToSearch};
+                break;  
+            case 'getAvailability':
+                query = { Name: itemToSearch };
+                break;  
+            case 'getDescription':
+                query = { Name: itemToSearch };
+                break;  
+            default:
+                console.log("Query assign failed.")
         }
 
         if (err)
@@ -97,27 +102,31 @@ function main(res, search, source, failText)
 
             if (itemExists && itemExists.length > 0)
             {
-              switch(source) {
-                case 'getCorePapers':
-                  successText = getCorePapers(itemExists);
-                  break;
-                case 'getPapersFromYearLevel':
-                  successText = getPapersFromYearLevel(itemExists);
-                  break;
-                case 'getPapersFromPoints':
-                  successText = getPapersFromPoints(itemExists);
-                  break;
-                case 'getPaperCode':
-                  successText = getPaperCode(itemExists);
-                  break;
-                case 'getPaperName':
-                  successText = getPaperName(itemExists);
-                  break;
-                case 'getAvailability':
-                    successText  = getAvailability(itemExists)
-                    break;
-                default:
-                  console.log("successText assign failed.")
+              switch(source) 
+              {
+                    case 'getCorePapers':
+                        successText = getCorePapers(itemExists);
+                        break;
+                    case 'getPapersFromYearLevel':
+                        successText = getPapersFromYearLevel(itemExists);
+                        break;
+                    case 'getPapersFromPoints':
+                        successText = getPapersFromPoints(itemExists);
+                        break;
+                    case 'getPaperCode':
+                        successText = getPaperCode(itemExists);
+                        break;
+                    case 'getPaperName':
+                        successText = getPaperName(itemExists);
+                        break;
+                    case 'getAvailability':
+                        successText  = getAvailability(itemExists)
+                        break;
+                    case 'getDescription':
+                        successText  = getDescription(itemExists)
+                        break;
+                    default:
+                        console.log("successText assign failed.")
               }
 
                 console.log("Return Object: " + JSON.stringify(
@@ -222,4 +231,9 @@ function getAvailability(nameExists)
   }
 
   return text;
+}
+
+function getDescription(nameExists)
+{
+    // To fill - Aren
 }
