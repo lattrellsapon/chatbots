@@ -1,16 +1,23 @@
 {
-  "name": "backend",
+  "name": "chatbot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "AUT Chatbot App",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^4.16.3",
-    "mongodb": "^3.0.7",
-    "mongoose": "^5.0.17"
+    "express": "*",
+    "mongodb": "*",
+    "mongoose": "*",
+    "body-parser": "*",
+    "cors": "*"
+  },
+  "author": "Kiran Chandradevan",
+  "license": "ISC",
+  "devDependencies": {
+    "@angular/cli": "*",
+    "nodemon": "^1.17.4"
   }
 }
