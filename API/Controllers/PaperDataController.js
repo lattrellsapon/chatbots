@@ -15,7 +15,7 @@ exports.processRequest = function (req, res)
             main(res, code, 'getPaperName', 'No information is currently available for the paper code.')
             break;
         case 'code':
-            main(res, name, 'getPaperCode', 'That is not currently a paper offered at AUT.')
+            main(res, name, 'getPaperCode', 'That is not a paper currently offered at AUT.')
             break;
         case 'papersFromLevel':
             main(res, parseFloat(level), 'getPapersFromYearLevel', 'No papers are available in that level in AUT.')
@@ -27,8 +27,10 @@ exports.processRequest = function (req, res)
             main(res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points.')
             break;
         case 'availabilityFromPapers':
-            main(res, name, 'getAvailability', 'Not available at AUT.')  
+            main(res, name, 'getAvailability', 'This paper is not available at AUT.')  
             break;
+        case 'descFromPaper':
+            main(res, name, 'getDescription', 'Sorry, I am unable to find that paper.')  
         default:
             console.log("Function assign failed")
     }
@@ -235,5 +237,5 @@ function getAvailability(nameExists)
 
 function getDescription(nameExists)
 {
-    // To fill - Aren
+    return nameExists[0].Code + " " + nameExists[0].Name + " : " + nameExists[0].Desc;
 }
