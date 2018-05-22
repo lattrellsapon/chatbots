@@ -6,4 +6,6 @@ node-js:
 before_script:
   - npm install mocha
 
-script:  npm run test 
+script:  
+  - npm run test
+  - gulp jshint 
