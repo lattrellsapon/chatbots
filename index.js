@@ -16,7 +16,7 @@ mongoose.connection.on('connected', () => {
 
 //Server, Port and Routes
 const app = express();
-const port = 8000;
+const port = process.env.PORT;
 const routes = require('./routes/routes');
 
 app.use(cors());
@@ -25,6 +25,6 @@ app.use('/', routes);
 
 app.use(express.static(path.join(__dirname, 'client')));
 
-app.listen(port, () => {
+app.listen(port || 8000, () => {
   console.log('Server started on port ' + port);
 })
