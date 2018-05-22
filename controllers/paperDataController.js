@@ -216,12 +216,14 @@ function getPapersFromPoints(pointsExists)
 
 function getPaperCode(nameExists)
 {
-    return "The code for the paper is " + nameExists[0].Code;
+    return `${nameExists[0].Code}: ${nameExists[0].Name} is a Level ${nameExists[0].Level} ` +
+    `paper worth ${nameExists[0].Points} points`;
 }
 
 function getPaperName(codeExists)
 {
-    return "This paper is called " + codeExists[0].Name;
+    return `${codeExists[0].Code} is a Level ${codeExists[0].Level} paper called ` +
+    `${codeExists[0].Name} worth ${codeExists[0].Points} points`;
 }
 
 function getPapersFromYearLevel(levelExists)
