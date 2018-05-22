@@ -25,7 +25,20 @@ exports.processRequest = function (req,res) {
             main(res, name, 'getAvailability', 'Not available at AUT.')
             break;
         case 'descFromPaper':
-            main(res, name, 'getDescription', 'This paper is not available.')
+            var param = JSON.stringify(req.body.result.parameters);
+            console.log(param);
+
+            if(param.search('\"PaperCode\":\"\"') != -1 )
+            {
+                main(res, name, 'getDescription', 'This paper is not available.')
+                console.log("name");
+            }
+            else
+            {
+                main(res, code, 'getDescriptionFromCode', 'This paper is not available.')
+                console.log(code);
+            }
+            
             break;
         default:
             console.log("Function assign failed")
@@ -66,6 +79,9 @@ function main(res, search, source, failText)
                 break;
             case 'getDescription':
                 query = { Name : itemToSearch };
+                break;
+            case 'getDescriptionFromCode':
+                query = { Code : itemToSearch };
                 break;
             default:
                 console.log("Query assign failed.");
@@ -123,6 +139,9 @@ function main(res, search, source, failText)
                 case 'getDescription':
                     successText = getDescription(itemExists);
                     break;
+                case 'getDescriptionFromCode':
+                    successText = getDescription(itemExists);
+                    break;
                 default:
                   console.log("successText assign failed.");
               }
@@ -156,7 +175,28 @@ function main(res, search, source, failText)
 
 function getCorePapers(levelExists)
 {
-    return getPapersFromYearLevel(levelExists);
+    var text = "";
+
+    for (var i = 0; i < levelExists.length; i++)
+    {
+        text += levelExists[i].Name + "(" + levelExists[i].Code + ") "
+        + levelExists[i].Points + " points";
+
+        if(i == levelExists.length -2)
+        {
+            text += " and "
+        }
+        else if (i == levelExists.length - 1)
+        {
+            //leave blank
+        }
+        else
+        {
+            text += ", "
+        }
+    }
+
+    return text;
 }
 
 function getPapersFromPoints(pointsExists)
@@ -217,7 +257,7 @@ function getAvailability(nameExists)
   return text;
 }
 
-function getDescription(nameExists)
+function getDescription(paperExists)
 {
-    return nameExists[0].Name + " (" + nameExists[0].Code + "): " + nameExists[0].Desc;
+    return paperExists[0].Name + " (" + paperExists[0].Code + "): " + paperExists[0].Desc;
 }
