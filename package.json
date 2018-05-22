@@ -8,16 +8,19 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "*",
-    "mongodb": "*",
-    "mongoose": "*",
     "body-parser": "*",
-    "cors": "*"
+    "cors": "*",
+    "express": "*",
+    "gulp": "^3.9.1",
+    "gulp-install": "^1.1.0",
+    "mongodb": "*",
+    "mongoose": "*"
   },
   "author": "Kiran Chandradevan",
   "license": "ISC",
   "devDependencies": {
     "@angular/cli": "*",
+    "jshint": "^2.9.5",
     "nodemon": "^1.17.4"
   }
 }
