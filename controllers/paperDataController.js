@@ -3,6 +3,7 @@ exports.processRequest = function (req,res) {
     var points = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperPoints ? req.body.result.parameters.PaperPoints : 'Unknown';
     var name = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
     var code = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
+    var param = JSON.stringify(req.body.result.parameters);
 
     switch(req.body.result.action) 
     {
@@ -22,21 +23,24 @@ exports.processRequest = function (req,res) {
             main(res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points.')
             break;
         case 'availabilityFromPapers':
-            main(res, name, 'getAvailability', 'Not available at AUT.')
+            if(param.search('\"PaperCode\":\"\"') != -1 )
+            {
+                main(res, name, 'getAvailability', 'Not available at AUT.')
+            }
+            else
+            {
+                main(res, code, 'getAvailabilityFromCode', 'Not available at AUT.')
+            }
+            
             break;
         case 'descFromPaper':
-            var param = JSON.stringify(req.body.result.parameters);
-            console.log(param);
-
             if(param.search('\"PaperCode\":\"\"') != -1 )
             {
                 main(res, name, 'getDescription', 'This paper is not available.')
-                console.log("name");
             }
             else
             {
                 main(res, code, 'getDescriptionFromCode', 'This paper is not available.')
-                console.log(code);
             }
             
             break;
@@ -76,6 +80,9 @@ function main(res, search, source, failText)
                 break;
             case 'getAvailability':
                 query = { Name: itemToSearch };
+                break;
+            case 'getAvailabilityFromCode':
+                query = { Code: itemToSearch };
                 break;
             case 'getDescription':
                 query = { Name : itemToSearch };
@@ -134,6 +141,9 @@ function main(res, search, source, failText)
                   successText = getPaperName(itemExists);
                   break;
                 case 'getAvailability':
+                    successText  = getAvailability(itemExists);
+                    break;
+                case 'getAvailabilityFromCode':
                     successText  = getAvailability(itemExists);
                     break;
                 case 'getDescription':
@@ -238,20 +248,20 @@ function getPapersFromYearLevel(levelExists)
 
     return text;
 }
-function getAvailability(nameExists)
+function getAvailability(paperExists)
 {
-    console.log(nameExists[0].Name);
+    console.log(paperExists[0].Name);
 
-  var text = `${nameExists[0].Name} is available in semester `;
+  var text = `${paperExists[0].Name}(${paperExists[0].Code}) is available in semester `;
 
-  for (var i = 0; i < nameExists[0].Semester.length; i++)
+  for (var i = 0; i < paperExists[0].Semester.length; i++)
   {
       if(i == 1)
       {
         text +=  " and "
       }
 
-      text += nameExists[0].Semester[i] ;
+      text += paperExists[0].Semester[i] ;
   }
 
   return text;
