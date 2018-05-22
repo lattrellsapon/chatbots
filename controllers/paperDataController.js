@@ -144,26 +144,12 @@ function main(res, search, source, failText)
 
 function getCorePapers(levelExists)
 {
-    var text = "";
-
-    for (var i = 0; i < levelExists.length; i++)
-    {
-        text += (levelExists[i].Code + " " + levelExists[i].Name + "\n");
-    }
-
-    return text;
+    return getPapersFromYearLevel(levelExists);
 }
 
 function getPapersFromPoints(pointsExists)
 {
-    var text = "";
-
-    for (var i = 0; i < pointsExists.length; i++)
-    {
-        text += (pointsExists[i].Code + " " + pointsExists[i].Name + " ");
-    }
-
-    return text;
+    return getPapersFromYearLevel(pointsExists);
 }
 
 function getPaperCode(nameExists)
