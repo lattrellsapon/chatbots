@@ -148,7 +148,7 @@ function getCorePapers(levelExists)
 
     for (var i = 0; i < levelExists.length; i++)
     {
-        text += (levelExists[i].Code + " " + levelExists[i].Name + " ");
+        text += (levelExists[i].Code + " " + levelExists[i].Name + "\n");
     }
 
     return text;
