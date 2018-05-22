@@ -2,10 +2,10 @@
   "name": "chatbot",
   "version": "1.0.0",
   "description": "AUT Chatbot App",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app"
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "*",
