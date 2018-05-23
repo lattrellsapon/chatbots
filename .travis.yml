@@ -15,3 +15,5 @@
 language: node_js
 node_js:
   - "node"
+script:
+  - gulp jshint
