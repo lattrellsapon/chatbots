@@ -3,11 +3,8 @@ sudo: false
 node-js:
   - "iojs"
   - "8"
-
-before_script:
+install:
   - npm install
-  - npm install mocha
-
 script:  
   - npm run test
   - gulp jshint 
