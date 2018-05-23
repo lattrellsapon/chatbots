@@ -17,3 +17,4 @@ node_js:
   - "node"
 script:
   - gulp jshint
+  - npm test
