@@ -7,7 +7,7 @@ exports.processRequest = function (req, res)
     var code = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
 
     // Stringify the parameter names and values
-    var param = JSON.stringify(req.body.result.parameters); 
+    var param = JSON.stringify(req.body.result.parameters);
 
     // Actions calls for the different parameters triggerred by user input
     switch(req.body.result.action)
@@ -322,10 +322,10 @@ function getDescription(paperExists)
 }
 
 function getPreReqs(paperExists) {
-  var reply= "";
+  var reply= reply = "There no enrolment prerequisites for this paper.";
 
     if (paperExists[0].AND_PreReq || paperExists[0].OR_PreReq) {
-      reply += "You will need to have completed "
+      reply = "You will need to have completed "
       if (paperExists[0].AND_PreReq) {
         reply += paperExists[0].AND_PreReq;
       }
@@ -348,10 +348,6 @@ function getPreReqs(paperExists) {
         reply += ", you also have to enrol into " + paperExists[0].CoReqs + " during the same semseter.";
       }
     }
-
-    reply = "There no enrolment prerequisites for this paper.";
-
-
 
     return reply;
 }
