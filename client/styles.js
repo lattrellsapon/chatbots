@@ -539,7 +539,7 @@ if(false) {}
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /Users/arencaballes/assignment1b/chatbots/angular-app/src/styles.scss */"./src/styles.scss");
+module.exports = __webpack_require__(/*! C:\Users\Kiran\Documents\GitHub\chatbots\angular-app\src\styles.scss */"./src/styles.scss");
 
 
 /***/ })

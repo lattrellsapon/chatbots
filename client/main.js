@@ -30,7 +30,7 @@ webpackEmptyAsyncContext.id = "./src/$$_lazy_route_resource lazy recursive";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div  class=\"chatform\">\n  <app-message-list [messages]=\"messages\"></app-message-list>\n  <app-message-form [message]=\"message\" [messages]=\"messages\"></app-message-form>\n</div>\n"
+module.exports = "<!--The content below is only a placeholder and can be replaced.-->\r\n<div  class=\"chatform\">\r\n  <app-message-list [messages]=\"messages\"></app-message-list>\r\n  <app-message-form [message]=\"message\" [messages]=\"messages\"></app-message-form>\r\n</div>\r\n"
 
 /***/ }),
 
@@ -181,7 +181,7 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"chatcontrol\">\n  <input type=\"text\" class=\"form-control chatinput\" [(ngModel)]=\"message.content\"/>\n  <button class=\"btn btn-success sendbtn\" (click)=\"sendMessage()\">Send</button>\n</div>\n"
+module.exports = "<div class=\"chatcontrol\">\n  <input (keydown.enter)=\"sendMessage()\" type=\"text\" class=\"form-control chatinput\" [(ngModel)]=\"message.content\"/>\n  <button class=\"btn btn-success sendbtn\" (click)=\"sendMessage()\">Send</button>\n</div>\n"
 
 /***/ }),
 
@@ -229,6 +229,9 @@ var MessageFormComponent = /** @class */ (function () {
     };
     MessageFormComponent.prototype.sendMessage = function () {
         var _this = this;
+        if (this.message.content == "") {
+            return;
+        }
         this.message.timestamp = new Date();
         this.messages.push(this.message);
         this.dialogFlowService.getResponse(this.message.content).subscribe(function (res) {
@@ -266,7 +269,7 @@ var MessageFormComponent = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<li class=\"list-group-item\">\n  <img [src]=\"message.avatar\" class=\"avatar\"/>\n  <div class=\"message\">\n    {{message.content}}\n  </div>\n  <div class=\"timeform\">\n    <i class=\"fa fa-clock-o\" aria-hidden=\"true\"></i> <span class=\"timestamp\">at {{message.timestamp | date : 'h:mm' }}</span>\n  </div>\n</li>\n"
+module.exports = "<li class=\"list-group-item\">\r\n  <img [src]=\"message.avatar\" class=\"avatar\"/>\r\n  <div class=\"message\">\r\n    {{message.content}}\r\n  </div>\r\n  <div class=\"timeform\">\r\n    <i class=\"fa fa-clock-o\" aria-hidden=\"true\"></i> <span class=\"timestamp\">at {{message.timestamp | date : 'h:mm' }}</span>\r\n  </div>\r\n</li>\r\n"
 
 /***/ }),
 
@@ -581,7 +584,7 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /Users/arencaballes/assignment1b/chatbots/angular-app/src/main.ts */"./src/main.ts");
+module.exports = __webpack_require__(/*! C:\Users\Kiran\Documents\GitHub\chatbots\angular-app\src\main.ts */"./src/main.ts");
 
 
 /***/ })
