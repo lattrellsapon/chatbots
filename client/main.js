@@ -41,7 +41,7 @@ module.exports = "<!--The content below is only a placeholder and can be replace
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ".chatform {\n  width: 600px;\n  margin: 0 auto;\n  margin-top: 50px; }\n"
+module.exports = ".chatform {\n  width: 600px;\n  margin: 0 auto;\n  max-height: 100%;\n  max-width: 100%; }\n"
 
 /***/ }),
 
@@ -349,7 +349,7 @@ module.exports = "<div class=\"chatlist\" #chatlist>\n  <ul class=\"list-group\"
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ".chatlist {\n  height: 600px;\n  overflow-y: scroll; }\n"
+module.exports = ".chatlist {\n  height: 600px;\n  overflow-y: scroll;\n  max-height: 90%; }\n"
 
 /***/ }),
 
