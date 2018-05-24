@@ -6,13 +6,6 @@ const request = require('supertest');
 
 const index = require('../index');
 
-//body parser
-// const bodyParser = require('body-parser');
-// index.use(bodyParser.urlencoded(
-//     {
-//         extended: false
-//     }));
-
 describe('Index', function()
 {
     it('Index should return port as undefined', function()
@@ -26,10 +19,33 @@ describe('Index', function()
         .get('/')
         .end((err, res) => {
             res.status.should.equal(200);
-            done(err);
+            // done(err);
         });
     });
 });
+
+
+describe('Get Paper code', () => {
+
+    it('should post paper code', () => {
+      request(index)
+        .post('/post')
+        .type('form')
+        .send({ 
+            PaperName: "Programming 2"
+          })
+        .end((err, res) => {
+          res.body.should.be.json;
+          res.body.should.equal({
+            "speech": "The code for the paper is COMP503",
+            "displayText": "The code for the paper is COMP503",
+            "source": "getPaperCode"
+        });
+          res.status.should.equal(200);
+      });
+    });
+  });
+
 
 
 
