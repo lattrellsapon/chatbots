@@ -5,7 +5,7 @@ exports.processRequest = function (req,res) {
     var code = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
     var param = JSON.stringify(req.body.result.parameters);
 
-    switch(req.body.result.action) 
+    switch(req.body.result.action)
     {
         case 'name':
             main(res, code, 'getPaperName', 'No information is currently available for the paper code.')
@@ -23,27 +23,34 @@ exports.processRequest = function (req,res) {
             main(res, parseFloat(points), 'getPapersFromPoints', 'No papers are worth that many points.')
             break;
         case 'availabilityFromPapers':
-            if(param.search('\"PaperCode\":\"\"') != -1 )
+            if(name != "Unknown")
             {
                 main(res, name, 'getAvailability', 'Not available at AUT.')
             }
-            else
+            else if (code != "Unknown")
             {
                 main(res, code, 'getAvailabilityFromCode', 'Not available at AUT.')
             }
-            
+
             break;
         case 'descFromPaper':
-            if(param.search('\"PaperCode\":\"\"') != -1 )
+            if(name != "Unknown")
             {
                 main(res, name, 'getDescription', 'This paper is not available.')
             }
-            else
+            else if (code != "Unknown")
             {
                 main(res, code, 'getDescriptionFromCode', 'This paper is not available.')
             }
-            
             break;
+        case 'preReq':
+          if (name != "Unknown") {
+            main(res,name, 'getPreReqsFromName', 'Seems like this paper doesnt exist.')
+          }
+          else if (code != "Unknown") {
+            main(res, code, 'getPreReqsFromCode', 'Seems like this code doesnt belong to a paper.')
+          }
+          break;
         default:
             console.log("Function assign failed")
     }
@@ -61,7 +68,7 @@ function main(res, search, source, failText)
     {
         var query = "";
 
-        switch(source) 
+        switch(source)
         {
             case 'getCorePapers':
                 query = { Core: "TRUE", Level: itemToSearch };
@@ -90,8 +97,21 @@ function main(res, search, source, failText)
             case 'getDescriptionFromCode':
                 query = { Code : itemToSearch };
                 break;
+            case 'getPreReqsFromName':
+                query = { Name: itemToSearch };
+                break;
+            case 'getPreReqsFromCode':
+                query = { Code: itemToSearch};
+                break;
             default:
                 console.log("Query assign failed.");
+                return res.json(
+                {
+                    speech: 'Database error',
+                    displayText: 'Database error',
+                    source: source
+                })
+                throw err;
         }
 
         if (err)
@@ -110,6 +130,7 @@ function main(res, search, source, failText)
 
         db.collection('PaperInfo').find(query).toArray((err, itemExists) =>
         {
+          console.log(JSON.stringify(itemExists));
             if (err)
             {
                 return res.json(
@@ -123,7 +144,8 @@ function main(res, search, source, failText)
 
             if (itemExists && itemExists.length > 0)
             {
-              switch(source) 
+              console.log(JSON.stringify(itemExists));
+              switch(source)
               {
                 case 'getCorePapers':
                   successText = getCorePapers(itemExists);
@@ -151,6 +173,10 @@ function main(res, search, source, failText)
                     break;
                 case 'getDescriptionFromCode':
                     successText = getDescription(itemExists);
+                    break;
+                case 'getPreReqsFromName':
+                case 'getPreReqsFromCode':
+                    successText = getPreReqs(itemExists);
                     break;
                 default:
                   console.log("successText assign failed.");
@@ -272,4 +298,39 @@ function getAvailability(paperExists)
 function getDescription(paperExists)
 {
     return paperExists[0].Name + " (" + paperExists[0].Code + "): " + paperExists[0].Desc;
+}
+
+function getPreReqs(paperExists) {
+  var reply= "";
+
+    if (paperExists[0].AND_PreReq || paperExists[0].OR_PreReq) {
+      reply += "You will need to have completed "
+      if (paperExists[0].AND_PreReq) {
+        reply += paperExists[0].AND_PreReq;
+      }
+
+      if (paperExists[0].OR_PreReq) {
+        if (paperExists[0].AND_PreReq) {
+            reply += " as well as "
+        }
+
+        for (var i=0; i<paperExists[0].OR_PreReq.length; i++) {
+            reply += paperExists[0].OR_PreReq[i];
+            if (i < paperExists[0].OR_PreReq.length -1) {
+              reply += " or ";
+            }
+        }
+      }
+      reply += " before you able to enrol in this paper";
+
+      if (paperExists[0].CoReqs) {
+        reply += ", you also have to enrol into " + paperExists[0].CoReqs + " during the same semseter.";
+      }
+    }
+
+    reply = "There no enrolment prerequisites for this paper.";
+
+
+
+    return reply;
 }

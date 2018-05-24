@@ -21,6 +21,9 @@ export class MessageFormComponent implements OnInit {
   }
 
   public sendMessage(): void {
+    if (this.message.content == "") {
+      return;
+    }
     this.message.timestamp = new Date();
     this.messages.push(this.message);
 
