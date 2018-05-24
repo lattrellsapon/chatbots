@@ -7,7 +7,7 @@ exports.processRequest = function (req, res)
     var code = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
 
     // Stringify the parameter names and values
-    var param = JSON.stringify(req.body.result.parameters);
+    var param = JSON.stringify(req.body.result.parameters); 
 
     // Actions calls for the different parameters triggerred by user input
     switch(req.body.result.action)
