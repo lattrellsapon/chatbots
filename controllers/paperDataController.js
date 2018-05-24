@@ -1,10 +1,15 @@
-exports.processRequest = function (req,res) {
+exports.processRequest = function (req, res)
+{
+    // Get parameter values
     var level = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperLevel ? req.body.result.parameters.PaperLevel : 'Unknown';
     var points = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperPoints ? req.body.result.parameters.PaperPoints : 'Unknown';
     var name = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperName ? req.body.result.parameters.PaperName : 'Unknown';
     var code = req.body.result && req.body.result.parameters && req.body.result.parameters.PaperCode ? req.body.result.parameters.PaperCode : 'Unknown';
+
+    // Stringify the parameter names and values
     var param = JSON.stringify(req.body.result.parameters);
 
+    // Actions calls for the different parameters triggerred by user input
     switch(req.body.result.action)
     {
         case 'name':
@@ -56,10 +61,17 @@ exports.processRequest = function (req,res) {
     }
 };
 
-// Connect to database
+// Connect to the database
 const MongoClient = require('mongodb').MongoClient;
 const url = "mongodb://devtest:test@ds117540.mlab.com:17540/autpaperdata";
 
+/**
+ * Main function: structures the flow of achieving a respoonse from the chatbot
+ * @param {*} res parameter result
+ * @param {*} search value to search in the database
+ * @param {*} source description of the function
+ * @param {*} failText response for no match found
+ */
 function main(res, search, source, failText)
 {
     let itemToSearch = search;
@@ -67,7 +79,9 @@ function main(res, search, source, failText)
     MongoClient.connect(url, (err, client) =>
     {
         var query = "";
+        var successText = "";
 
+        // Set query statements for each user input
         switch(source)
         {
             case 'getCorePapers':
@@ -114,6 +128,7 @@ function main(res, search, source, failText)
                 throw err;
         }
 
+        // Database connection error
         if (err)
         {
             return res.json(
@@ -125,12 +140,11 @@ function main(res, search, source, failText)
             throw err;
         }
 
+        // Query the database
         const db = client.db('autpaperdata');
-        var successText = "";
-
         db.collection('PaperInfo').find(query).toArray((err, itemExists) =>
         {
-          console.log(JSON.stringify(itemExists));
+            // Database connection error
             if (err)
             {
                 return res.json(
@@ -142,26 +156,27 @@ function main(res, search, source, failText)
                 throw err;
             }
 
+            // Database returns results, call function to get a response
             if (itemExists && itemExists.length > 0)
             {
               console.log(JSON.stringify(itemExists));
               switch(source)
               {
                 case 'getCorePapers':
-                  successText = getCorePapers(itemExists);
-                  break;
+                    successText = getCorePapers(itemExists);
+                    break;
                 case 'getPapersFromYearLevel':
-                  successText = getPapersFromYearLevel(itemExists);
-                  break;
+                    successText = getPapersFromYearLevel(itemExists);
+                    break;
                 case 'getPapersFromPoints':
-                  successText = getPapersFromPoints(itemExists);
-                  break;
+                    successText = getPapersFromPoints(itemExists);
+                    break;
                 case 'getPaperCode':
-                  successText = getPaperCode(itemExists);
-                  break;
+                    successText = getPaperCode(itemExists);
+                    break;
                 case 'getPaperName':
-                  successText = getPaperName(itemExists);
-                  break;
+                    successText = getPaperName(itemExists);
+                    break;
                 case 'getAvailability':
                     successText  = getAvailability(itemExists);
                     break;
@@ -182,6 +197,7 @@ function main(res, search, source, failText)
                   console.log("successText assign failed.");
               }
 
+                // Print result to the console
                 console.log("Return Object: " + JSON.stringify(
                 {
                     speech: successText,
@@ -195,7 +211,7 @@ function main(res, search, source, failText)
                     source: source
                 });
             }
-            else
+            else // Database did not return any results
             {
                 return res.json(
                 {
@@ -208,6 +224,11 @@ function main(res, search, source, failText)
         })
     })
 }
+
+/**
+ * The following functions generate and return a text response.
+ * It takes in the item being queried from the database.
+ */
 
 function getCorePapers(levelExists)
 {
