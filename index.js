@@ -28,3 +28,9 @@ app.use(express.static(path.join(__dirname, 'client')));
 app.listen(port || 8000, () => {
   console.log('Server started on port ' + port);
 })
+
+module.exports = function()
+{
+  return `${port}`;
+}
+
